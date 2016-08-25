@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package textchatclientgui;
 
 import com.sun.glass.events.KeyEvent;
@@ -26,9 +22,10 @@ import javax.swing.JOptionPane;
  */
 public class MainPage extends javax.swing.JFrame {
 
-    Socket echoSocket=null;
-    String userName="";
-    int portNumber = 6999;
+    /* Global variables */
+    Socket echoSocket=null;     // socket will be cnstructed from hostName and portNumber
+    String userName="";         // username - entered from promt when program starts
+    int portNumber = 6999;      
     String hostName="localhost";
     BufferedReader bReader=null;
     PrintWriter pWriter=null;
@@ -38,8 +35,6 @@ public class MainPage extends javax.swing.JFrame {
         initComponents();
         connectToServer();
         readSettings();
-        
-        JOptionPane.showMessageDialog(null, "Ok sve na startu");
         this.setVisible(true);
     }
 
@@ -247,15 +242,15 @@ public class MainPage extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
-        // TODO add your handling code here:
+        // Quit option - not implemented yet
     }//GEN-LAST:event_jMenuItem3ActionPerformed
 
     private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
-        // TODO add your handling code here:
+        // Save as option - not implemented yet
     }//GEN-LAST:event_jMenuItem2ActionPerformed
 
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
-        // TODO add your handling code here:
+        // Save option - not implemented yet
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
@@ -263,7 +258,7 @@ public class MainPage extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jTextField1KeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextField1KeyPressed
-        // TODO add your handling code here:
+        // when user presses Enter method sendText() is called
         if(evt.getKeyCode()==KeyEvent.VK_ENTER)
         {
             sendText();
@@ -271,7 +266,7 @@ public class MainPage extends javax.swing.JFrame {
     }//GEN-LAST:event_jTextField1KeyPressed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
+        // saves hostname and port data to file
         hostName=jTextField2.getText();
         portNumber=Integer.parseInt(jTextField3.getText());
         try 
@@ -292,7 +287,7 @@ public class MainPage extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        // TODO add your handling code here:
+        // reconnects to server
         hostName=jTextField2.getText();
         portNumber=Integer.parseInt(jTextField3.getText());
         connectToServer();
@@ -358,13 +353,14 @@ public class MainPage extends javax.swing.JFrame {
     // End of variables declaration//GEN-END:variables
 
     private void sendText() 
-    {
+    {   // pWriter writes data to socket connection
         pWriter.println(userName+": "+jTextField1.getText());
         jTextField1.setText("");
     }
 
     private void connectToServer() 
     {
+        // connects to server and sets reader and writes for text exchange
         try { 
             echoSocket=new Socket(hostName,portNumber);
             bReader=new BufferedReader(new InputStreamReader(this.echoSocket.getInputStream()));
@@ -381,6 +377,7 @@ public class MainPage extends javax.swing.JFrame {
 
     private void getUserName() 
     {
+        // promts user for username on program start
         while(true)
         {
             userName = JOptionPane.showInputDialog(null,"Enter username, at least 5 characters");
@@ -393,6 +390,8 @@ public class MainPage extends javax.swing.JFrame {
 
     private void readSettings() 
     {
+        // reads username, hostname and port from settings file
+        // if file does not exist it will promt user for username, and set hostname=localhost and port=6999
         File f=new File("settings.set");
         if(f.exists())
         {
@@ -425,7 +424,7 @@ public class MainPage extends javax.swing.JFrame {
         }
     }
 
-    private class portListener implements Runnable {
+    private class portListener implements Runnable {    // listens to data that comes over socket connection
 
         public portListener() 
         {
@@ -444,7 +443,6 @@ public class MainPage extends javax.swing.JFrame {
             } 
             catch (IOException ex) 
             {
-                //JOptionPane.showMessageDialog(null,"Port listener exception...");
                 jTextArea1.append("Connection to server lost.");
                 Logger.getLogger(MainPage.class.getName()).log(Level.SEVERE, null, ex);
             }
