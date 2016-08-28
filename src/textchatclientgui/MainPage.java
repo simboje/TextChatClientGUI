@@ -356,16 +356,14 @@ public class MainPage extends javax.swing.JFrame {
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         //reconnect sequence
-        try 
+        /*try 
         {
-                echoSocket.close();
-                echoSocket.shutdownInput();
-                echoSocket.shutdownOutput();
+                socketCleanUp();
         } 
         catch (IOException ex) 
         {
             Logger.getLogger(MainPage.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        }*/
         updateGUItextToVariables();
         connectToServer();
     }//GEN-LAST:event_jButton3ActionPerformed
@@ -461,12 +459,18 @@ public class MainPage extends javax.swing.JFrame {
     private void connectToServer() 
     {
         // connects to server and sets reader and writer for text exchange
+        showText("1");
         try { 
             echoSocket=new Socket(hostName,portNumber);
+            showText("2");
             bReader=new BufferedReader(new InputStreamReader(this.echoSocket.getInputStream()));
+            showText("3");
             pWriter = new PrintWriter(this.echoSocket.getOutputStream(),true);      // autoflush set to true
+            showText("4");
             pWriter.println(userName);
+            showText("5");
             readOnlineUsers();
+            showText("6");
             jTextArea1.append("Connection to: "+hostName+" on port: "+portNumber+" succesfull.\n");
             serverListener = new Thread(new portListener());
             serverListener.start();
@@ -474,8 +478,14 @@ public class MainPage extends javax.swing.JFrame {
         }
         catch (IOException ex)
         {
+            showText("ex1");
             connectionFailed();
+            showText("ex2");
             showText("Connection to server not possible. \n");
+        }
+        catch (Exception e)
+        {
+            showText("Something is not working in connection. "+e.toString());
         }
     }
 
@@ -510,11 +520,11 @@ public class MainPage extends javax.swing.JFrame {
                 updateVariablesToGUI();
             } 
             catch (FileNotFoundException ex) 
-            {   // not a problem for, but we still need a username so method getUserName is called
+            {   // not a big problem, but we still need a username so method getUserName is called
                 getUserName();
             } 
             catch (IOException ex) 
-            {   // not a problem for, but we still need a username so method getUserName is called
+            {   // not a big problem, but we still need a username so method getUserName is called
                 getUserName();
             }    
     }
@@ -586,6 +596,21 @@ public class MainPage extends javax.swing.JFrame {
         jTextArea1.append("Connection not possible to "+hostName  + "\n");
         jTextArea1.setBackground(Color.RED);
         jTextArea1.setForeground(Color.white);
+        /*try 
+        {
+            socketCleanUp();
+        } 
+        catch (IOException ex) 
+        {
+            Logger.getLogger(MainPage.class.getName()).log(Level.SEVERE, null, ex);
+        }*/
+    }
+
+    private void socketCleanUp() throws IOException
+    {
+        echoSocket.close();
+        echoSocket.shutdownInput();
+        echoSocket.shutdownOutput();
     }
 
     private class portListener implements Runnable {    // listens to data that comes over socket connection
@@ -613,7 +638,7 @@ public class MainPage extends javax.swing.JFrame {
 
         private void connectionLost() 
         {
-            jTextArea1.append("Connection lost to "+hostName);
+            jTextArea1.append("Connection lost to "+hostName+"\n");
             jTextArea1.setBackground(Color.RED);
             jTextArea1.setForeground(Color.white);
         }
