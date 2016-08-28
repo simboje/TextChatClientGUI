@@ -2,6 +2,7 @@
 package textchatclientgui;
 
 import com.sun.glass.events.KeyEvent;
+import java.awt.Color;
 import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.File;
@@ -31,12 +32,13 @@ public class MainPage extends javax.swing.JFrame {
     BufferedReader bReader=null;
     PrintWriter pWriter=null;
     Thread serverListener;
+    
     public MainPage() 
     {
         initComponents();
+        this.setVisible(true);      // changed order of commands, main window loads first, then the user is prompted for username *looks better*
+        readSettings();
         connectToServer();
-        //readSettings();
-        this.setVisible(true);
     }
 
     /**
@@ -58,17 +60,18 @@ public class MainPage extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
-        jTextField2 = new javax.swing.JTextField();
-        jTextField3 = new javax.swing.JTextField();
+        tf2 = new javax.swing.JTextField();
+        tf3 = new javax.swing.JTextField();
         jScrollPane2 = new javax.swing.JScrollPane();
         jTextArea2 = new javax.swing.JTextArea();
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
+        jLabel8 = new javax.swing.JLabel();
+        tf1 = new javax.swing.JTextField();
         jScrollPane3 = new javax.swing.JScrollPane();
-        jTextArea3 = new javax.swing.JTextArea();
+        tfUsers = new javax.swing.JTextArea();
         jLabel6 = new javax.swing.JLabel();
-        jScrollPane4 = new javax.swing.JScrollPane();
-        jList1 = new javax.swing.JList<>();
+        jLabel7 = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
@@ -109,9 +112,20 @@ public class MainPage extends javax.swing.JFrame {
 
         jLabel5.setText("Port");
 
-        jTextField2.setText("localhost");
+        tf2.setText("localhost");
 
-        jTextField3.setText("6999");
+        tf3.setText("6999");
+        tf3.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                tf3KeyPressed(evt);
+            }
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                tf3KeyReleased(evt);
+            }
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                tf3KeyTyped(evt);
+            }
+        });
 
         jTextArea2.setEditable(false);
         jTextArea2.setColumns(20);
@@ -135,6 +149,8 @@ public class MainPage extends javax.swing.JFrame {
             }
         });
 
+        jLabel8.setText("Username:");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -142,22 +158,24 @@ public class MainPage extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel4)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jScrollPane2)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel3)
-                        .addGap(0, 0, Short.MAX_VALUE))
+                        .addComponent(tf3, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jButton3)
                         .addGap(18, 18, 18)
-                        .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel4)
+                            .addComponent(jLabel3)
+                            .addComponent(jLabel8))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(tf2, javax.swing.GroupLayout.DEFAULT_SIZE, 78, Short.MAX_VALUE)
+                            .addComponent(tf1))))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -165,41 +183,35 @@ public class MainPage extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel3)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel8)
+                    .addComponent(tf1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
-                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(tf2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
-                    .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(tf3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton3)
                     .addComponent(jButton2))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 315, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
-        jTextArea3.setEditable(false);
-        jTextArea3.setColumns(20);
-        jTextArea3.setRows(5);
-        jScrollPane3.setViewportView(jTextArea3);
+        tfUsers.setEditable(false);
+        tfUsers.setColumns(20);
+        tfUsers.setRows(5);
+        jScrollPane3.setViewportView(tfUsers);
 
         jLabel6.setText("Online users");
 
-        jList1.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
-        jList1.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jList1MouseClicked(evt);
-            }
-        });
-        jScrollPane4.setViewportView(jList1);
+        jLabel7.setText("ChatRoom:");
 
         jMenu1.setText("File");
 
@@ -237,24 +249,23 @@ public class MainPage extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 444, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 249, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 444, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(layout.createSequentialGroup()
+                            .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 249, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(jButton1)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addComponent(jLabel7))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel6)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(126, Short.MAX_VALUE))
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -264,11 +275,11 @@ public class MainPage extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel6)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane3)
-                            .addComponent(jScrollPane4)))
+                        .addComponent(jScrollPane3))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 467, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel7)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 447, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -325,43 +336,56 @@ public class MainPage extends javax.swing.JFrame {
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // saves hostname and port data to file
-        hostName=jTextField2.getText();
-        portNumber=Integer.parseInt(jTextField3.getText());
+        updateGUItextToVariables();
         try 
         {
             File f=new File("settings.set");
             if(f.exists())
                 f.delete();
             FileWriter fwrite=new FileWriter(f);
-            fwrite.append(userName);
+            fwrite.append(userName+"\n");
             fwrite.append(hostName+"\n");
             fwrite.append(portNumber+"");
             fwrite.close();
         } 
         catch (IOException ex) 
         {
-            jTextArea1.append("Error while saving PORT number value.");
+            showText("Error while saving PORT number value.");
         }
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        try {
-            // reconnects to server
-            //serverListener.interrupt();
-            //bReader.close();
-            //pWriter.close();
-            echoSocket.close();
-        } catch (IOException ex) {
+        //reconnect sequence
+        try 
+        {
+                echoSocket.close();
+                echoSocket.shutdownInput();
+                echoSocket.shutdownOutput();
+        } 
+        catch (IOException ex) 
+        {
             Logger.getLogger(MainPage.class.getName()).log(Level.SEVERE, null, ex);
         }
-        hostName=jTextField2.getText();
-        portNumber=Integer.parseInt(jTextField3.getText());
+        updateGUItextToVariables();
         connectToServer();
     }//GEN-LAST:event_jButton3ActionPerformed
 
-    private void jList1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jList1MouseClicked
-        JOptionPane.showMessageDialog(this, jList1.getSelectedValue());
-    }//GEN-LAST:event_jList1MouseClicked
+    private void tf3KeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tf3KeyPressed
+        
+    }//GEN-LAST:event_tf3KeyPressed
+
+    private void tf3KeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tf3KeyTyped
+
+        
+    }//GEN-LAST:event_tf3KeyTyped
+
+    private void tf3KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tf3KeyReleased
+        // TODO add your handling code here:
+        if((evt.getKeyCode()>=KeyEvent.VK_A && evt.getKeyCode()<=KeyEvent.VK_Z) || (evt.getKeyCode()>=KeyEvent.VK_SPACE && evt.getKeyCode()<=KeyEvent.VK_SLASH))
+        {
+            tf3.setText(tf3.getText().substring(0, tf3.getText().length()-1));
+        }
+    }//GEN-LAST:event_tf3KeyReleased
 
     /**
      * @param args the command line arguments
@@ -408,7 +432,8 @@ public class MainPage extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
-    private javax.swing.JList<String> jList1;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
@@ -418,13 +443,13 @@ public class MainPage extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
-    private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JTextArea jTextArea1;
     private javax.swing.JTextArea jTextArea2;
-    private javax.swing.JTextArea jTextArea3;
     private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
-    private javax.swing.JTextField jTextField3;
+    private javax.swing.JTextField tf1;
+    private javax.swing.JTextField tf2;
+    private javax.swing.JTextField tf3;
+    private javax.swing.JTextArea tfUsers;
     // End of variables declaration//GEN-END:variables
 
     private void sendText() 
@@ -435,18 +460,22 @@ public class MainPage extends javax.swing.JFrame {
 
     private void connectToServer() 
     {
-        // connects to server and sets reader and writes for text exchange
+        // connects to server and sets reader and writer for text exchange
         try { 
             echoSocket=new Socket(hostName,portNumber);
             bReader=new BufferedReader(new InputStreamReader(this.echoSocket.getInputStream()));
             pWriter = new PrintWriter(this.echoSocket.getOutputStream(),true);      // autoflush set to true
-            readSettings();
+            pWriter.println(userName);
+            readOnlineUsers();
             jTextArea1.append("Connection to: "+hostName+" on port: "+portNumber+" succesfull.\n");
-            
+            serverListener = new Thread(new portListener());
+            serverListener.start();
+            connectionEstablished();
         }
         catch (IOException ex)
         {
-            jTextArea1.append("Connection to server not possible. \n");
+            connectionFailed();
+            showText("Connection to server not possible. \n");
         }
     }
 
@@ -457,10 +486,10 @@ public class MainPage extends javax.swing.JFrame {
         {
             userName = JOptionPane.showInputDialog(this,"Enter username, at least 5 characters");
             if(userName.length()<5)
-                JOptionPane.showMessageDialog(this, "Username must be at least 5 characters long!");
+                showText("Username must be at least 5 characters long!");
             else
             {
-                pWriter.println(userName);
+                updateVariablesToGUI();
                 break;
             }
                 
@@ -470,38 +499,24 @@ public class MainPage extends javax.swing.JFrame {
     private void readSettings() 
     {
         // reads username, hostname and port from settings file
-        // if file does not exist it will promt user for username, and set hostname=localhost and port=6999
+        // if file does not exist it will promt user for username, and set hostname=localhost and port=6999 (these are default settings)
         File f=new File("settings.set");
 
             try (BufferedReader bRead = new BufferedReader(new FileReader(f));)
             {
-                
                 userName=bRead.readLine();
                 hostName=bRead.readLine();
                 portNumber=Integer.parseInt(bRead.readLine());
-                pWriter.println(userName);
-                bRead.close();
+                updateVariablesToGUI();
             } 
             catch (FileNotFoundException ex) 
-            {
-                //JOptionPane.showMessageDialog(this,"FilenotFound...");
-                Logger.getLogger(MainPage.class.getName()).log(Level.SEVERE, null, ex);
+            {   // not a problem for, but we still need a username so method getUserName is called
+                getUserName();
             } 
             catch (IOException ex) 
-            {
-                JOptionPane.showMessageDialog(this,"IO exce");
-                Logger.getLogger(MainPage.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            finally
-            {
+            {   // not a problem for, but we still need a username so method getUserName is called
                 getUserName();
-                readOnlineUsers();
-                serverListener = new Thread(new portListener());
-                serverListener.start();
-                
-            }
-        
-
+            }    
     }
     
     private void saveHistory() 
@@ -514,7 +529,7 @@ public class MainPage extends javax.swing.JFrame {
         } 
         catch (IOException ex) 
         {
-            Logger.getLogger(MainPage.class.getName()).log(Level.SEVERE, null, ex);
+            showText("Error while saving. "+ex.toString());
         }
     }
 
@@ -522,21 +537,55 @@ public class MainPage extends javax.swing.JFrame {
     {
         try 
         {
-            jTextArea3.setText("");
+            tfUsers.setText("");
             //JOptionPane.showMessageDialog(this, "readOnlineUsers startovao.");
             int usernum = Integer.parseInt(bReader.readLine());
             //JOptionPane.showMessageDialog(null, "usernum"+usernum);
             for(int i=1;i<=usernum;i++)
             {
                 String usname = bReader.readLine();
-                jTextArea3.append(usname+"\n");
+                tfUsers.append(usname+"\n");
                 //JOptionPane.showMessageDialog(this, usname);
             }
         } 
         catch (IOException ex) 
         {
-            Logger.getLogger(MainPage.class.getName()).log(Level.SEVERE, null, ex);
+            showText("Something bad happened while exchanging user data with server.");
         }
+    }
+
+    private void updateGUItextToVariables() 
+    {
+        userName = tf1.getText();
+        hostName = tf2.getText();
+        portNumber = Integer.parseInt(tf3.getText());
+    }
+
+    private void showText(String string)        // shorter version of ...showMessageDialog...
+    {
+        JOptionPane.showMessageDialog(this, string);
+        
+    }
+
+    private void updateVariablesToGUI() 
+    {
+        tf1.setText(userName);
+        tf2.setText(hostName);
+        tf3.setText(portNumber+"");
+    }
+
+    private void connectionEstablished() 
+    {
+        jTextArea1.append("Connection established to "+hostName + "\n");
+        jTextArea1.setBackground(Color.GREEN);
+        jTextArea1.setForeground(Color.BLACK);
+    }
+
+    private void connectionFailed() 
+    {
+        jTextArea1.append("Connection not possible to "+hostName  + "\n");
+        jTextArea1.setBackground(Color.RED);
+        jTextArea1.setForeground(Color.white);
     }
 
     private class portListener implements Runnable {    // listens to data that comes over socket connection
@@ -558,11 +607,15 @@ public class MainPage extends javax.swing.JFrame {
             } 
             catch (IOException ex) 
             {
-                jTextArea1.append("Connection to server lost.\n");
-                jTextArea3.setText("");
-                // add color for server conn lost
-                Logger.getLogger(MainPage.class.getName()).log(Level.SEVERE, null, ex);
+                connectionLost();
             }
+        }
+
+        private void connectionLost() 
+        {
+            jTextArea1.append("Connection lost to "+hostName);
+            jTextArea1.setBackground(Color.RED);
+            jTextArea1.setForeground(Color.white);
         }
     }
 }
