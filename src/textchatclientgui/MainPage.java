@@ -1,22 +1,35 @@
 
 package textchatclientgui;
 
+import UserDataPackage.UserData;
 import com.sun.glass.events.KeyEvent;
 import java.awt.Color;
 import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.security.NoSuchAlgorithmException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 /**
  *
@@ -27,12 +40,13 @@ public class MainPage extends javax.swing.JFrame {
     /* Global variables */
     Socket echoSocket=null;     // socket will be cnstructed from hostName and portNumber
     String userName="";         // username - entered from promt when program starts
-    int portNumber = 6999;      
+    int portNumber = 50000;      
     String hostName="localhost";
     BufferedReader bReader=null;
     PrintWriter pWriter=null;
     Thread serverListener;
-    
+    UserData userData;
+    String password;
     public MainPage() 
     {
         initComponents();
@@ -339,31 +353,25 @@ public class MainPage extends javax.swing.JFrame {
         updateGUItextToVariables();
         try 
         {
-            File f=new File("settings.set");
-            if(f.exists())
-                f.delete();
-            FileWriter fwrite=new FileWriter(f);
-            fwrite.append(userName+"\n");
-            fwrite.append(hostName+"\n");
-            fwrite.append(portNumber+"");
-            fwrite.close();
+                KeyGenerator keygenerator = KeyGenerator.getInstance("DES");
+                SecretKey myDesKey = keygenerator.generateKey();
+                Cipher desCipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
+                byte[] keyAsByte = myDesKey.getEncoded();
+                desCipher.init(Cipher.ENCRYPT_MODE, myDesKey);
+
+                FileOutputStream fw = new FileOutputStream("data.enc");
+                ObjectOutputStream os = new ObjectOutputStream(fw);
+                os.writeObject(userData);
+                os.close();
         } 
-        catch (IOException ex) 
+        catch (Exception ex) 
         {
             showText("Error while saving PORT number value.");
         }
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        //reconnect sequence
-        /*try 
-        {
-                socketCleanUp();
-        } 
-        catch (IOException ex) 
-        {
-            Logger.getLogger(MainPage.class.getName()).log(Level.SEVERE, null, ex);
-        }*/
+        getUserName();
         updateGUItextToVariables();
         connectToServer();
     }//GEN-LAST:event_jButton3ActionPerformed
@@ -459,18 +467,18 @@ public class MainPage extends javax.swing.JFrame {
     private void connectToServer() 
     {
         // connects to server and sets reader and writer for text exchange
-        showText("1");
         try { 
-            echoSocket=new Socket(hostName,portNumber);
-            showText("2");
+            echoSocket=new Socket();
+            echoSocket.connect(new InetSocketAddress(hostName,portNumber),1000);
             bReader=new BufferedReader(new InputStreamReader(this.echoSocket.getInputStream()));
-            showText("3");
+            
+            ObjectOutputStream oos = new ObjectOutputStream(echoSocket.getOutputStream());
+            oos.writeObject(userData);
+            //jTextArea1.append(new String(userData.pass));
             pWriter = new PrintWriter(this.echoSocket.getOutputStream(),true);      // autoflush set to true
-            showText("4");
-            pWriter.println(userName);
-            showText("5");
+            pWriter.println(userName);    //we will now print object
             readOnlineUsers();
-            showText("6");
+
             jTextArea1.append("Connection to: "+hostName+" on port: "+portNumber+" succesfull.\n");
             serverListener = new Thread(new portListener());
             serverListener.start();
@@ -478,10 +486,10 @@ public class MainPage extends javax.swing.JFrame {
         }
         catch (IOException ex)
         {
-            showText("ex1");
+            //showText("ex1");
             connectionFailed();
-            showText("ex2");
-            showText("Connection to server not possible. \n");
+            //showText("ex2");
+            //showText("Connection to server not possible. \n");
         }
         catch (Exception e)
         {
@@ -491,42 +499,82 @@ public class MainPage extends javax.swing.JFrame {
 
     private void getUserName() 
     {
+        JTextField user=new JTextField(10);
+        JTextField pass=new JTextField(10);
+        
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel,BoxLayout.PAGE_AXIS));
+        panel.add(user);
+        panel.add(Box.createHorizontalStrut(15));
+        panel.add(pass);
+        
         // promts user for username on program start
         while(true)
         {
-            userName = JOptionPane.showInputDialog(this,"Enter username, at least 5 characters");
-            if(userName.length()<5)
-                showText("Username must be at least 5 characters long!");
+            //int res = JOptionPane.showInputDialog(this,"Enter username, at least 5 characters");
+            int res = JOptionPane.showConfirmDialog(this,panel,"Enter your username and password.",1);
+            if(res==JOptionPane.OK_OPTION)
+            {
+                userName= user.getText();
+                password = pass.getText();
+                if(userName.length()<5 || password.length()<5)
+                    showText("Username and password each must be at least 5 characters long!");
+                else
+                {
+                    try 
+                    {                       
+                        KeyGenerator keygenerator = KeyGenerator.getInstance("DES");
+                        SecretKey myDesKey = keygenerator.generateKey();
+                        Cipher desCipher = Cipher.getInstance("DES");
+                        byte[] keyAsByte = myDesKey.getEncoded();
+                        desCipher.init(Cipher.ENCRYPT_MODE, myDesKey);
+                        byte[] text = password.getBytes("UTF8");
+                        byte[] textEncrypted = desCipher.doFinal(text);
+                        userData = new UserData(userName,textEncrypted,keyAsByte,hostName,portNumber);
+                        updateVariablesToGUI();
+                        break;
+                    } 
+                    catch (NoSuchAlgorithmException ex) {
+                        showText("NoALG exc "+ex.toString());
+                        Logger.getLogger(MainPage.class.getName()).log(Level.SEVERE, null, ex);
+                        break;
+                    } catch (Exception ex) {
+                        showText("exc "+ex.toString());
+                        Logger.getLogger(MainPage.class.getName()).log(Level.SEVERE, null, ex);
+                        break;
+                    }
+                    
+                }
+            }
             else
             {
-                updateVariablesToGUI();
-                break;
+                JOptionPane.showMessageDialog(this, "Closing...");
+                dispatchEvent(new WindowEvent(this,WindowEvent.WINDOW_CLOSED));
             }
                 
         }
     }
 
-    private void readSettings() 
+    private void readSettings()
     {
-        // reads username, hostname and port from settings file
-        // if file does not exist it will promt user for username, and set hostname=localhost and port=6999 (these are default settings)
-        File f=new File("settings.set");
-
-            try (BufferedReader bRead = new BufferedReader(new FileReader(f));)
-            {
-                userName=bRead.readLine();
-                hostName=bRead.readLine();
-                portNumber=Integer.parseInt(bRead.readLine());
-                updateVariablesToGUI();
-            } 
-            catch (FileNotFoundException ex) 
-            {   // not a big problem, but we still need a username so method getUserName is called
-                getUserName();
-            } 
-            catch (IOException ex) 
-            {   // not a big problem, but we still need a username so method getUserName is called
-                getUserName();
-            }    
+        File f = new File("data.enc");
+        try
+        {
+            FileInputStream fis = new FileInputStream(f);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            userData=(UserData) ois.readObject();
+            ois.close();
+            userName=userData.name;
+            password=new String(userData.pass);
+            hostName=userData.hostName;
+            portNumber=userData.portNumber;
+            updateVariablesToGUI();
+        }
+        catch (Exception ex)
+        {
+            getUserName();
+        }
+        
     }
     
     private void saveHistory() 
@@ -606,12 +654,6 @@ public class MainPage extends javax.swing.JFrame {
         }*/
     }
 
-    private void socketCleanUp() throws IOException
-    {
-        echoSocket.close();
-        echoSocket.shutdownInput();
-        echoSocket.shutdownOutput();
-    }
 
     private class portListener implements Runnable {    // listens to data that comes over socket connection
 
